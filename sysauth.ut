@@ -1,0 +1,103 @@
+<!-- Created By CodingNepal -->
+<html lang="en" dir="ltr">
+   <head>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+      <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#09c">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="msapplication-TileColor" content="#09c">
+        <meta name="application-name" content="{{ hostname }} - LuCI">
+        <meta name="apple-mobile-web-app-title" content="{{ hostname }} - LuCI">
+        <link rel="stylesheet" href="{{ media }}/loginpage.css">
+        <link rel="shortcut icon" href="{{ media }}/favicon.ico">
+        {% if (node?.css): %}
+        <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
+        {% endif %}
+        <script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+        <script src="{{ resource }}/cbi.js?v=git-23.088.30860-f464199"></script>
+        <title>Login Bang</title>
+        {% if (css): %}
+        <style title="text/css">{{ css }}</style>
+        {% endif %}
+        </head>
+   </head>
+   <body style="background-image: url('{{ media }}/bg.jpeg');">
+      <div class="cbi-map">
+         <header>Login Bang</header>
+         <script type="text/javascript">window.setTimeout("waktu()",1000); function waktu(){var tanggal=new Date(); setTimeout("waktu()",1000); document.getElementById("jam").innerHTML=tanggal.getHours()+":"+tanggal.getMinutes()+":"+tanggal.getSeconds();}</script> <script language="JavaScript"> var tanggallengkap=new String(); var namahari=("Minggu Senin Selasa Rabu Kamis Jumat Sabtu"); namahari=namahari.split(" "); var namabulan=("Januari Februari Maret April Mei Juni Juli Agustus September Oktober November Desember"); namabulan=namabulan.split(" "); var tgl=new Date(); var hari=tgl.getDay(); var tanggal=tgl.getDate(); var bulan=tgl.getMonth(); var tahun=tgl.getFullYear(); tanggallengkap=namahari[hari] + ", " +tanggal + " " + namabulan[bulan] + " " + tahun; </script>       
+<center><script language='JavaScript'>document.write(tanggallengkap); </script> | <span id='jam' ></span></center>
+<form method="post" class="form">
+	{% if (fuser): %}
+		<div class="alert-message warning">
+			<p>{{ _('Nama atau password salah, Coba lagi.') }}</p>
+		</div>
+	{% endif %}
+            <div class="input-field">
+               <input type="text" required name="luci_username" placeholder="Username" autocomplete="off" value="{{ entityencode(duser, true) }}" >
+               <label><i class="fa fa-user"></i> Username</label>
+            </div>
+            <div class="input-field input_group">
+               <input class="pswrd" type="password" required name="luci_password" autocomplete="off">
+               <span class="show">lihat</span>
+               <label><i class="fa fa-unlock-alt"></i> Password</label>
+            </div>
+            <div class="cbi-page-actions">
+              <div class="button" id="login_button">
+               <div class="inner"></div>
+               <button type="submit" value="{{ _('Log in') }}" class="btn cbi-button cbi-button-apply">LOGIN</button>
+            </div>
+           </div>
+         </form>
+      </div>
+      {%
+        let https_ports = uci.get('uhttpd', 'main', 'listen_https') ?? [];
+      
+        https_ports = uniq(filter(
+          map(
+            (type(https_ports) == 'string') ? split(https_port, /\s+/) : https_ports,
+            e => +match(e, /\d+$/)?.[0]
+          ),
+          p => (p >= 0 && p <= 65535)
+        ));
+      %}
+      
+      <script type="text/javascript">//<![CDATA[
+        var input = document.getElementsByName('luci_password')[0];
+      
+        if (input)
+          input.focus();
+      
+        if (document.location.protocol != 'https:') {
+          {{ https_ports }}.forEach(function(port) {
+            var url = 'https://' + window.location.hostname + ':' + port + window.location.pathname;
+            var img = new Image();
+      
+            img.onload = function() { window.location = url };
+            img.src = 'https://' + window.location.hostname + ':' + port + '{{ resource }}/icons/loading.gif?' + Math.random();
+      
+            setTimeout(function() { img.src = '' }, 5000);
+          });
+        }
+      //]]></script>
+      {% include('footer') %}
+      <script>
+         var input = document.querySelector('.pswrd');
+         var show = document.querySelector('.show');
+         show.addEventListener('click', active);
+         function active(){
+           if(input.type === "password"){
+             input.type = "text";
+             show.style.color = "#1DA1F2";
+             show.textContent = "sembunyikan";
+           }else{
+             input.type = "password";
+             show.textContent = "lihat";
+             show.style.color = "#111";
+           }
+         }
+      </script>
+   </body>
